@@ -4,6 +4,7 @@ const {
 } = require("@nomicfoundation/hardhat-network-helpers");
 const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 const { expect } = require("chai");
+const keccak256 = require("keccak256");
 
 describe("Test", function () {
   // We define a fixture to reuse the same setup in every test.
@@ -34,6 +35,16 @@ describe("Test", function () {
         const manufacturer = await hexagon.getManufacturer(owner.address);
         await expect(manufacturer[1]).equals(name);
         await expect(manufacturer[2]).equals(owner.address);
+      });
+
+      it("Should return true if isManufacturer is called with registered account as arg", async function () {
+        const { hexagon, owner } = await registerManufacturer("hexdee");
+        await expect(await hexagon.isManufacturer(owner.address)).true;
+      });
+
+      it("Should return false if isManufacturer is called with unregistered account as arg", async function () {
+        const { hexagon, otherAccount } = await registerManufacturer("hexdee");
+        await expect(await hexagon.isManufacturer(otherAccount.address)).false;
       });
 
       it("Should increase total manufacturer", async function () {
@@ -95,6 +106,78 @@ describe("Test", function () {
       });
     })
 
+    describe("Create Item", async function () {
+      it("Should only allow manufacturers create item", async function () {
+        const { hexagon, owner, otherAccount } = await loadFixture(deployHexagon);
+        const items = [keccak256("hexdee")];
+        const name = "name";
+        const url = "https://url";
+        await hexagon.register("hexdee");
+        await hexagon.createProduct(name, url);
+        await expect(hexagon.createItems(name, items)).not.to.be.reverted;
+        await expect(hexagon.connect(otherAccount).createItems(name, items)).to.be.revertedWith("only product manufacturers can call this function!");
+      });
+
+      it("Should revert if product does not exist", async function () {
+        const { hexagon, owner, otherAccount } = await loadFixture(deployHexagon);
+        const items = [keccak256("hexdee")];
+        const name = "name";
+        const url = "https://url";
+        await hexagon.register("hexdee");
+        await hexagon.createProduct(name, url);
+        await expect(hexagon.createItems("invalid product", items)).to.be.revertedWith("invalid product!");
+        await expect(hexagon.connect(otherAccount).createItems("invalid product", items)).to.be.revertedWith("invalid product!");
+      });
+
+      it("Should increase number of items", async function () {
+        const { hexagon, owner, otherAccount } = await loadFixture(deployHexagon);
+        const items = [keccak256("hexdee")];
+        const name = "name";
+        const url = "https://url";
+        await hexagon.register("hexdee");
+        await hexagon.createProduct(name, url);
+        await hexagon.createItems(name, items);
+        const product = await hexagon.getProduct(name);
+        await expect(Number(product[4])).equals(1);
+      });
+
+      it("Should authenticate code created by merchant", async function () {
+        const { hexagon, owner, otherAccount } = await loadFixture(deployHexagon);
+        const items = [keccak256(ethers.utils.formatBytes32String("hexdee"))];
+        const name = "name";
+        const url = "https://url";
+        await hexagon.register("hexdee");
+        await hexagon.createProduct(name, url);
+        await hexagon.createItems(name, items);
+        const codeInByte32 = ethers.utils.formatBytes32String("hexdee");
+        await expect(hexagon.checkAuthenticity(name, codeInByte32)).not.to.be.reverted
+      });
+
+      it("Should not authenticate a code twice", async function () {
+        const { hexagon, owner, otherAccount } = await loadFixture(deployHexagon);
+        const items = [keccak256(ethers.utils.formatBytes32String("hexdee"))];
+        const name = "name";
+        const url = "https://url";
+        await hexagon.register("hexdee");
+        await hexagon.createProduct(name, url);
+        await hexagon.createItems(name, items);
+        const codeInByte32 = ethers.utils.formatBytes32String("hexdee");
+        await expect(hexagon.checkAuthenticity(name, codeInByte32)).not.to.be.reverted
+        await expect(hexagon.checkAuthenticity(name, codeInByte32)).to.be.revertedWith("product bought!");
+      });
+
+      it("Should not authenticate invalid code", async function () {
+        const { hexagon, owner, otherAccount } = await loadFixture(deployHexagon);
+        const items = [keccak256(ethers.utils.formatBytes32String("hexdee"))];
+        const name = "name";
+        const url = "https://url";
+        await hexagon.register("hexdee");
+        await hexagon.createProduct(name, url);
+        await hexagon.createItems(name, items);
+        const codeInByte32 = ethers.utils.formatBytes32String("hexagon");
+        await expect(hexagon.checkAuthenticity(name, codeInByte32)).to.be.revertedWith("code invalid!");
+      });
+    })
 
     describe("Others", async function () {
       it("Should allow only manufacturer update product", async function () {
