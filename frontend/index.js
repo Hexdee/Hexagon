@@ -1,11 +1,7 @@
 // React
-import React from "react";
-import * as ReactDOM from 'react-dom';
-import App from "../frontend/src/App"
-import { BrowserRouter } from "react-router-dom";
-import "@fontsource/josefin-sans";
-import "@fontsource/roboto";
-import "./index.css";
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
 
 // NEAR
 import { Wallet } from './near-wallet';
@@ -20,15 +16,8 @@ const wallet = new Wallet({ createAccessKeyFor: CONTRACT_ADDRESS })
 window.onload = async () => {
   const isSignedIn = await wallet.startUp()
  
-  // ReactDOM.render(
-  //   <App isSignedIn={isSignedIn} contractId={CONTRACT_ADDRESS} wallet={wallet} />,
-  //   document.getElementById('root')
-  // );
-
   ReactDOM.render(
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>,
-    document.getElementById("root")
+    <App isSignedIn={isSignedIn} contractId={CONTRACT_ADDRESS} wallet={wallet} />,
+    document.getElementById('root')
   );
 }
