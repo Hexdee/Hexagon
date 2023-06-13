@@ -35,108 +35,79 @@ export class Wallet {
 
   // To be called when the website loads
   async startUp() {
-    try {
-      this.walletSelector = await setupWalletSelector({
-        network: this.network,
-        modules: [setupMyNearWallet({ iconUrl: MyNearIconUrl }),
-        setupLedger({ iconUrl: LedgerIconUrl })],
-      });
+    this.walletSelector = await setupWalletSelector({
+      network: this.network,
+      modules: [setupMyNearWallet({ iconUrl: MyNearIconUrl }),
+      setupLedger({ iconUrl: LedgerIconUrl })],
+    });
 
-      const isSignedIn = this.walletSelector.isSignedIn();
+    const isSignedIn = this.walletSelector.isSignedIn();
 
-      if (isSignedIn) {
-        this.wallet = await this.walletSelector.wallet();
-        this.accountId = this.walletSelector.store.getState().accounts[0].accountId;
-      }
-
-      return isSignedIn;
-    } catch (err) {
-      window.alert("An error occured!");
-      console.log(err);
+    if (isSignedIn) {
+      this.wallet = await this.walletSelector.wallet();
+      this.accountId = this.walletSelector.store.getState().accounts[0].accountId;
     }
+
+    return isSignedIn;
   }
 
   // Sign-in method
   signIn() {
-    try {
-      const description = 'Please select a wallet to sign in.';
-      const modal = setupModal(this.walletSelector, { contractId: this.createAccessKeyFor, description });
-      modal.show();
-    } catch (err) {
-      window.alert("An error occured!");
-      console.log(err);
-    }
+    const description = 'Please select a wallet to sign in.';
+    const modal = setupModal(this.walletSelector, { contractId: this.createAccessKeyFor, description });
+    modal.show();
   }
 
   // Sign-out method
   signOut() {
-    try {
-      this.wallet.signOut();
-      this.wallet = this.accountId = this.createAccessKeyFor = null;
-      window.location.replace(window.location.origin + window.location.pathname);
-    } catch (err) {
-      window.alert("An error occured!");
-      console.log(err);
-    }
+    this.wallet.signOut();
+    this.wallet = this.accountId = this.createAccessKeyFor = null;
+    window.location.replace(window.location.origin + window.location.pathname);
   }
 
   // Make a read-only call to retrieve information from the network
   async viewMethod({ contractId, method, args = {} }) {
-    try {
-      const { network } = this.walletSelector.options;
-      const provider = new providers.JsonRpcProvider({ url: network.nodeUrl });
+    const { network } = this.walletSelector.options;
+    const provider = new providers.JsonRpcProvider({ url: network.nodeUrl });
 
-      let res = await provider.query({
-        request_type: 'call_function',
-        account_id: contractId,
-        method_name: method,
-        args_base64: Buffer.from(JSON.stringify(args)).toString('base64'),
-        finality: 'optimistic',
-      });
-      return JSON.parse(Buffer.from(res.result).toString());
-    } catch (err) {
-      window.alert("An error occured!");
-      console.log(err);
-    }
+    let res = await provider.query({
+      request_type: 'call_function',
+      account_id: contractId,
+      method_name: method,
+      args_base64: Buffer.from(JSON.stringify(args)).toString('base64'),
+      finality: 'optimistic',
+    });
+    return JSON.parse(Buffer.from(res.result).toString());
   }
 
   // Call a method that changes the contract's state
   async callMethod({ contractId, method, args = {}, gas = THIRTY_TGAS, deposit = NO_DEPOSIT }) {
     // Sign a transaction with the "FunctionCall" action
-    try {
-      return await this.wallet.signAndSendTransaction({
-        signerId: this.accountId,
-        receiverId: contractId,
-        actions: [
-          {
-            type: 'FunctionCall',
-            params: {
-              methodName: method,
-              args,
-              gas,
-              deposit,
-            },
+    return await this.wallet.signAndSendTransaction({
+      signerId: this.accountId,
+      receiverId: contractId,
+      actions: [
+        {
+          type: 'FunctionCall',
+          params: {
+            methodName: method,
+            args,
+            gas,
+            deposit,
           },
-        ],
-      });
-    } catch (err) {
-      window.alert("An error occured!");
-      console.log(err);
-    }
+        },
+      ],
+    });
   }
 
   // Get transaction result from the network
   async getTransactionResult(txhash) {
-    try {
-      const { network } = this.walletSelector.options;
-      const provider = new providers.JsonRpcProvider({ url: network.nodeUrl });
+    const { network } = this.walletSelector.options;
+    const provider = new providers.JsonRpcProvider({ url: network.nodeUrl });
 
-      // Retrieve transaction result from the network
-      const transaction = await provider.txStatus(txhash, 'unnused');
-      return providers.getTransactionLastResult(transaction);
-    } catch (err) {
-      window.alert("An error occured!");
-      console.log(err);
-    }
+    // Retrieve transaction result from the network
+    const transaction = await provider.txStatus(txhash, 'unnused');
+    return providers.getTransactionLastResult(transaction);
+
   }
 }

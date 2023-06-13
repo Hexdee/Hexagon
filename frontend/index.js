@@ -1,7 +1,8 @@
 // React
 import React from 'react';
-import ReactDOM from 'react-dom';
+import * as ReactDOM from 'react-dom';
 import App from './App';
+import "@fontsource/josefin-sans";
 
 // NEAR
 import { Wallet } from './near-wallet';
