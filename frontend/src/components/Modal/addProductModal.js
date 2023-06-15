@@ -16,7 +16,7 @@ import {
 } from "@chakra-ui/react";
 import { useState, useContext } from "react";
 import TextInput from "../TextInputs/TextInput";
-import { Web3Storage } from 'web3.storage/dist/bundle.esm.min.js';
+import { Web3Storage, File } from 'web3.storage/dist/bundle.esm.min.js';
 import { toaster } from "evergreen-ui";
 import UserContext from "../../context/User";
 import { createProduct } from "../../utils/hexagon";
@@ -51,8 +51,9 @@ const AddProductModal = ({
     setIsSubmiting(true);
     try {
       const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDVBQzdkNzllM0JkYjZFRTA2YTEyOTM5NzFEM2VDMTdGM2VEMDY1NTAiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2NjA1NzI3ODUyMzIsIm5hbWUiOiJFbmxpZ2h0ZW4ifQ.5J8VraV5Jd0jia6I8AvDxSTB0oNiNbq-r470OXUMKMQ";
-      const storage = new Web3Storage({ token })
-      const cid = await storage.put([productFile, productImage]);
+      const storage = new Web3Storage({ token });
+      const descFile = new File([productDesc], 'description.txt');
+      const cid = await storage.put([descFile, productFile, productImage]);
       if (cid) {
         setIsSubmiting(false);
         toaster.success("Product successfully added !")

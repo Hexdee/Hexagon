@@ -1,5 +1,5 @@
 import { Box, Flex, Image, Text } from "@chakra-ui/react";
-import { Link } from "evergreen-ui";
+import { Link, toaster } from "evergreen-ui";
 import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import UserContext from "../../context/User";
@@ -16,17 +16,20 @@ const ProductDetailsTemp = () => {
   const getProductDetails = async () => {
     try {
       const product = await getProduct(id);
+      const res = await fetch(`https://${product.url}.ipfs.w3s.link/description.txt`);
+      product.description = await res.text();
       product.image = `https://${product.url}.ipfs.w3s.link/image.png`;
       product.file = `https://${product.url}.ipfs.w3s.link/file.pdf`;
       setProduct(product);
     } catch (err) {
       navigate("/information");
+      toaster.danger(err.message);
       console.log(err);
     }
   }
 
   useEffect(() => {
-    getProduct();
+    getProductDetails();
   }, []);
 
   return (
