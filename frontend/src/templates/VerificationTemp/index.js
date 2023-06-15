@@ -6,36 +6,68 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import VerificationIcon from "../../assets/icons/verification-icon.png";
 import CustomButton from "../../components/CustomButton/customButton";
 import SuccessModal from "../../components/Modal/successModal";
 import TextInput from "../../components/TextInputs/TextInput";
 import LatestNews from "../LatestNews";
 import { toaster } from "evergreen-ui";
+import UserContext from "../../context/User";
+import ErrorModal from "../../components/Modal/errorModal";
+import { checkAuthenticity } from "../../utils/hexagon";
 
 const VerificationTemp = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: isErrorIsOpen, onOpen: isErrorOnOpen, onClose: isErrorOnClose } = useDisclosure();
   const [code, setCode] = useState('');
+  const [productName, setProductName] = useState('');
+  const user = useContext(UserContext);
+  const [isValid, setIsValid] = useState(false);
 
-  const handleClick = () => {
-    if (code === "62991117606") {
-      onOpen();
-    } else {
-      toaster.danger("Error occured, code not valid!");
+  const bought = async () => {
+    try {
+      const res = await user.wallet.callMethod({ contractId: user.contractId, method: "bought", args: { code } });
+    } catch (err) {
+      console.log(err);
+      // toaster.danger("Error occured!");
+    }
+  }
+
+  const handleClick = async () => {
+    try {
+      const res = await checkAuthenticity(productName, code);
+      setIsValid(res);
+      if (res == 0) {
+        onOpen();
+      }
+      if (res == 2) {
+        //Duplicate
+        isErrorOnOpen();
+        //Open error modal
+      }
+      if (res == 1) {
+        //Invalid code
+        isErrorOnOpen();
+        //Open error modal
+      }
+    } catch (err) {
+      toaster.danger("Error occured!");
+      console.log(err);
     }
   }
 
 
   return (
-    <Flex w="100%">
-      <Box w="70%">
+    <Flex w="100%" display={{ base: 'block', lg: 'flex' }}>
+      <Box w={{ base: '100%', lg: "70%" }}>
         <SimpleGrid
-          columns={2}
+          columns={{ base: 1, lg: 2 }}
           bg="brand.blue"
           alignItems="center"
           p="40px 20px"
           borderRadius="8px"
+          textAlign={{ base: "center", lg: 'left' }}
         >
           <Box>
             <Text color="brand.white" fontSize="28px">
@@ -47,7 +79,7 @@ const VerificationTemp = () => {
               interactive method.
             </Text>
           </Box>
-          <Box ml="40px">
+          <Box ml={{ base: '0', lg: "40px" }}>
             <Image src={VerificationIcon} alt="dahsboard-home-icon" />
           </Box>
         </SimpleGrid>
@@ -55,6 +87,7 @@ const VerificationTemp = () => {
         <Box bg="brand.white" p="40px" mt="40px" borderRadius="8px">
           <Text fontSize="20px">Enter product ID to verify</Text>
           <Text>Please follow the steps below to authenticate your drugs</Text>
+          <TextInput placeholder="Enter product name" value={productName} onChange={(e) => setProductName(e.target.value)} />
           <TextInput placeholder="Enter unique code" value={code} onChange={(e) => setCode(e.target.value)} />
 
           <CustomButton
@@ -91,30 +124,34 @@ const VerificationTemp = () => {
         </Box>
       </Box>
 
-      <Box w="30%" ml="20px">
+      <Box w={{ base: '100%', lg: "30%" }} ml={{ base: '0', lg: "20px" }}>
         <LatestNews />
       </Box>
 
       <SuccessModal
         isOpen={isOpen}
         onClose={onClose}
-        message="Authetication Verified"
+        message="Valid"
+        onClick={bought}
         handleNoOnclick={() => onClose()}
       >
         <Text>
           This product is valid.
         </Text>
-      <Box textAlign="left" mt="20px">
-      <Text fontWeight="600">Product Info</Text>
-        <Text>Product name: ASPIRIN</Text>
-        <Text>Product ID: 62991117606</Text>
-        <Text>Manufacturer: Bayer</Text>
-        <Text>Shelf life: 2 years</Text>
-        <Text>Date of first authorisation/renewal of the authorisation: 07/10/2016</Text>
-      </Box>
       </SuccessModal>
+      <ErrorModal
+        isOpen={isErrorIsOpen}
+        onClose={isErrorOnClose}
+        onClick={isErrorOnClose}
+        message="Not valid"
+        handleNoOnclick={() => isErrorOnClose()}
+      >
+        <Text>
+          {isValid ? "This product is a duplicate" : "This product is not valid"}
+        </Text>
+      </ErrorModal>
+
     </Flex>
   );
 };
-
 export default VerificationTemp;

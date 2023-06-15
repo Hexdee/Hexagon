@@ -23,6 +23,11 @@ const colors = {
   },
 };
 
+const config = {
+  initialColorMode: 'light',
+  useSystemColorMode: false,
+}
+
 const fonts = {
   heading: `'', "Josefin Sans", "Roboto"`,
   body: ` "Josefin Sans", "Roboto"`,
@@ -37,6 +42,6 @@ const styles = {
   },
 };
 
-const theme = extendTheme({ colors, styles, fonts, breakpoints });
+const theme = extendTheme({ colors, styles, fonts, breakpoints, config });
 
 export default theme;

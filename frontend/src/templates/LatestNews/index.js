@@ -4,14 +4,21 @@ import Admin from "../../assets/icons/Admin-icon.png";
 import { useEffect, useState } from "react";
 import { Spinner, toaster } from "evergreen-ui";
 import axios from "axios";
+import { useContext } from "react";
+import UserContext from "../../context/User";
+import { isConnected, amIAManufacturer } from "../../utils/hexagon";
 
 const LatestNews = () => {
   const [news, setNews] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(false)
+  const [isManufacturer, setIsManufacturer] = useState(false);
 
   const api = `https://newsapi.org/v2/top-headlines?q=health&apiKey=${process.env.REACT_APP_NEWS_API_KEY}`
 
   useEffect(() => {
+    setIsSignedIn(isConnected())
+    amIAManufacturer().then((res) => setIsManufacturer(res));
     setIsLoading(true);
     axios
       .get(
@@ -36,7 +43,7 @@ const LatestNews = () => {
       <Box mt="20px">
         <Divider />
 
-      {/* {isLoading ? <Spinner /> :
+        {/* {isLoading ? <Spinner /> :
       <>
         {news.splice(0, 10).map((res, index) => (
           <>
@@ -54,22 +61,31 @@ const LatestNews = () => {
         ))}
       </>
       } */}
-
-        <Flex alignItems="center" justifyContent="space-between" bg="brand.blue" mt="
+        {window.location.pathname != '/manufacturer/home' &&
+          <Flex alignItems="center" justifyContent="space-between" bg="brand.blue" mt="
         20px" p="20px">
-            <Box color="white">
-                <Text>Become an Admin</Text>
-                <Text>Do you want to register as a manufacturer at BONAFIDE?</Text>
-                <CustomButton bg="white" mt="20px" href="/manufacturer">
-                    <Text color="brand.blue">REGISTER</Text>
+            {isManufacturer ?
+              <Box color="white">
+                <Text > You're a manufacturer</Text>
+                <CustomButton bg="white" mt="20px" href="/manufacturer/home">
+                  <Text color="brand.blue"> Go to Dashboard</Text>
                 </CustomButton>
-            </Box>
+              </Box> :
+              <Box color="white">
+                <Text > Become an Admin</Text>
+                <Text>Do you want to register as a manufacturer at Hexagon?</Text>
+                <CustomButton bg="white" mt="20px" href={isConnected() ? "/manufacturer" : "#"}>
+                  <Text color="brand.blue">REGISTER</Text>
+                </CustomButton>
+              </Box>
+            }
             <Box>
-                <Image src={Admin} w="150px" alt="admin" />
+              <Image src={Admin} w="150px" alt="admin" />
             </Box>
-        </Flex>
-      </Box>
-    </Box>
+          </Flex>
+        }
+      </Box >
+    </Box >
   );
 };
 

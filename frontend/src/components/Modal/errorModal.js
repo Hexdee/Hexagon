@@ -8,10 +8,10 @@ import {
   Box,
   Text,
 } from "@chakra-ui/react";
-import { successIconGreen, closeModal } from "../../assets/svgs/svg";
+import { successIconGreen, closeModal, errorIcon } from "../../assets/svgs/svg";
 import CustomButton from "../CustomButton/customButton";
 
-function SuccessModal({
+function ErrorModal({
   isOpen,
   onClose,
   message,
@@ -30,7 +30,7 @@ function SuccessModal({
         </Box>
         <ModalBody>
           <Box p="0 15px" w="100%" textAlign="center">
-            <Box justifyContent="center">{successIconGreen}</Box>
+            <Box justifyContent="center">{errorIcon}</Box>
             <Text
               mt="28px"
               mb="12px"
@@ -55,7 +55,7 @@ function SuccessModal({
             <Box mt="32px" mb="30px">
               <CustomButton
                 width="180px"
-                bg="brand.blue"
+                bg="red"
                 color="brand.white"
                 onClick={onClick}
                 hoverBg="brand.primary"
@@ -63,7 +63,7 @@ function SuccessModal({
                 testid="on-close"
               // href="/verification"
               >
-                Confirm Purchase
+                Okay
               </CustomButton>
             </Box>
           </Box>
@@ -73,4 +73,4 @@ function SuccessModal({
   );
 }
 
-export default SuccessModal;
+export default ErrorModal;

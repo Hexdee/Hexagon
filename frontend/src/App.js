@@ -1,10 +1,10 @@
 import "./App.css";
 import AppRoute from "./routes/appRoute";
 
-function App() {
+function App({ isSignedIn, contractId, wallet }) {
   return (
     <div>
-      <AppRoute />
+      <AppRoute isSignedIn={isSignedIn} contractId={contractId} wallet={wallet} />
     </div>
   );
 }

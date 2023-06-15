@@ -1,19 +1,21 @@
 import { Box, Text } from "@chakra-ui/react";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import CustomButton from "../../components/CustomButton/customButton";
 import TextInput from "../../components/TextInputs/TextInput";
 import { useNavigate } from "react-router-dom";
 import { toaster } from "evergreen-ui";
+import UserContext from "../../context/User";
+import { getProduct } from "../../utils/hexagon";
 
 const StepTwoTemp = () => {
-  const [code, setCode] = useState('');
+  const [name, setName] = useState('');
   const navigate = useNavigate();
+  const user = useContext(UserContext);
 
-  const handleClick = () => {
-    if (code === "B01AC06") {
-      navigate('/information/product-details');
-    } else {
-      toaster.danger("Error occured, code not valid!");
+  const handleClick = async () => {
+    const res = await getProduct(name);
+    if (res) {
+      navigate(`/information/product-details/${name}`);
     }
   }
   return (
@@ -21,10 +23,10 @@ const StepTwoTemp = () => {
       <Box>
         <Text fontWeight="600">Get information about your drugs</Text>
         <Text mt="10px">
-          To get started, kindly enter the brand name of the drug and follow the
+          To get started, kindly enter the name of the drug and follow the
           steps below.
         </Text>
-        <TextInput placeholder="Enter unique code" value={code} onChange={(e) => setCode(e.target.value)} />
+        <TextInput placeholder="Enter product name" value={name} onChange={(e) => setName(e.target.value)} />
         <CustomButton
           color="brand.white"
           bg="brand.blue"
@@ -32,9 +34,9 @@ const StepTwoTemp = () => {
           mt="20px"
           mx="auto"
           onClick={handleClick}
-          disabled={!code}
+          disabled={!name}
         >
-          Learn more
+          Get Info
         </CustomButton>
 
         <Box mt="100px">
