@@ -12,18 +12,18 @@ import CustomButton from "../../components/CustomButton/customButton";
 import AddItemModal from "../../components/Modal/addItemModal";
 import AddProductModal from "../../components/Modal/addProductModal";
 import UserContext from "../../context/User";
-import { getManufacturer } from "../../utils/hexagon";
+import { getManufacturer, getProduct } from "../../utils/hexagon";
 import LatestNews from "../LatestNews";
 
 const ManufacturerDashboardTemp = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { isOpen: itemIsOpen, onOpen: itemOnOpen, onClose: itemOnClose } = useDisclosure();
   const [manufacturer, setManufacturer] = useState();
+  const [products, setProducts] = useState();
   const user = useContext(UserContext);
 
   const getManufacturerDetails = async () => {
     const res = await getManufacturer();
-    console.log({ res })
     setManufacturer(res);
   }
 

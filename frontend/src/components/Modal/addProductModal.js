@@ -56,7 +56,6 @@ const AddProductModal = ({
       const cid = await storage.put([descFile, productFile, productImage]);
       if (cid) {
         setIsSubmiting(false);
-        toaster.success("Product successfully added !")
         onClose();
         setTimeout(() => {
           window.location.reload();

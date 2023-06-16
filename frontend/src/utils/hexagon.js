@@ -5,10 +5,10 @@ import ShortUniqueId from "short-unique-id";
 import hexagonJson from "./Hexagon.json";
 const uid = new ShortUniqueId({ length: 10 });
 
-const hexagonAddress = "0xb6276f6892873d4577e1524f7eb195b118d11334";
+const hexagonAddress = "0x74b1Cf996957e5D6d86037932Ed59bd9c053Ab9e";
 const hexagonAbi = hexagonJson.abi;
 
-const nodeProvider = "https://api.baobab.klaytn.net:8651/";
+const nodeProvider = "https://api.calibration.node.glif.io/rpc/v1";
 
 export async function connectWallet() {
     try {
@@ -17,7 +17,7 @@ export async function connectWallet() {
             localStorage.setItem("isConnected", accounts[0]);
             await window.ethereum.request({
                 method: 'wallet_switchEthereumChain',
-                params: [{ chainId: '0x3E9' }], // chainId must be in hexadecimal numbers
+                params: [{ chainId: '0x4CB2F' }], // chainId must be in hexadecimal numbers
             });
             return accounts[0];
         } else {
@@ -32,15 +32,15 @@ export async function connectWallet() {
                     method: 'wallet_addEthereumChain',
                     params: [
                         {
-                            chainId: '0x3E9',
-                            chainName: 'Klaytn Testnet Baobab',
+                            chainId: '0x4CB2F',
+                            chainName: 'Filecoin Calibration testnet',
                             nativeCurrency: {
-                                name: 'Klaytn Token',
-                                symbol: 'KLAY', // 2-6 characters long
+                                name: 'Filecoin Token',
+                                symbol: 'FIL', // 2-6 characters long
                                 decimals: 18
                             },
-                            blockExplorerUrls: ['https://baobab.scope.klaytn.com/'],
-                            rpcUrls: ['https://api.baobab.klaytn.net:8651'],
+                            blockExplorerUrls: ['https://calibration.filscan.io/'],
+                            rpcUrls: ['https://api.calibration.node.glif.io/rpc/v1'],
                         },
                     ],
                 });
@@ -98,6 +98,7 @@ export async function createItems(productName, amount) {
         toaster.success("Items created successfully!");
         return codes;
     } catch (err) {
+        console.log({ err });
         toaster.danger(`Error: ${err.message}`);
     }
 }

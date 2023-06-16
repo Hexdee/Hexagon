@@ -15,11 +15,13 @@ const DashboardContainer = ({ children }) => {
   async function connect() {
     await connectWallet();
     setIsConnected(true);
+    window.location.reload();
   }
 
   function disconnect() {
     disconnectWallet();
     setIsConnected(false);
+    window.location.reload();
   }
 
   return (
