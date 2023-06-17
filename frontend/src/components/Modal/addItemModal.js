@@ -42,6 +42,7 @@ const AddItemModal = ({ isOpen, onClose, header, products }) => {
   const handleProceed = async (e) => {
     e.preventDefault();
     const res = await createItems(productName, itemNumber);
+    console.log({ res });
     setCodes(res);
     onClose();
     onOpenCode();

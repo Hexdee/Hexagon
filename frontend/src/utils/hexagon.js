@@ -1,9 +1,13 @@
 import { ethers } from "ethers";
 import { toaster } from "evergreen-ui";
 import keccak256 from "keccak256";
-import ShortUniqueId from "short-unique-id";
 import hexagonJson from "./Hexagon.json";
+import ShortUniqueId from "short-unique-id";
+import { Buffer } from "buffer";
 const uid = new ShortUniqueId({ length: 10 });
+
+window.Buffer = window.Buffer || Buffer;
+
 
 const hexagonAddress = "0x74b1Cf996957e5D6d86037932Ed59bd9c053Ab9e";
 const hexagonAbi = hexagonJson.abi;
@@ -90,11 +94,15 @@ export async function createItems(productName, amount) {
         const codes = [];
         const hexagon = await getHexagon();
         for (let i = 0; i < amount; i++) {
-            codes.push(uid());
+            // const code = crypto.randomUUID().slice(16);
+            const code = uid();
+            codes.push(code);
         }
+        console.log({ codes });
         const codeHashes = codes.map((code) => keccak256(ethers.utils.formatBytes32String(code)));
-        const tx = await hexagon.register(productName, codeHashes);
-        await tx.wait();
+        console.log({ codeHashes });
+        const tx = await hexagon.createItems(productName, codeHashes);
+        // tx.wait();
         toaster.success("Items created successfully!");
         return codes;
     } catch (err) {
